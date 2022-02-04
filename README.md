@@ -2,7 +2,7 @@
 an unsafe botched job that doesn't rely on types being 'static lifetime
 
 # Usage
-```
+```rust
 #[derive(Id)]
 struct TestStruct1{
   data: u32
