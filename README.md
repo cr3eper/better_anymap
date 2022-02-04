@@ -1,5 +1,8 @@
 # better_anymap
-an unsafe botched job that doesn't rely on types being 'static lifetime
+An unsafe botched job that doesn't rely on types being 'static lifetime.
+Will panic if provided a 0 field struct. I will fix this when I figure out how.
+
+
 
 # Usage
 ```rust
