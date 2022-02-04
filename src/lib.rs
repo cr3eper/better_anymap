@@ -5,6 +5,7 @@ use std::mem::{transmute, size_of, transmute_copy};
 
 #[macro_use]
 extern crate better_anymap_derive;
+pub use better_anymap_derive::Id;
 
 pub trait Id{
     fn get_id() -> u32;
