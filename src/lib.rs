@@ -1,7 +1,6 @@
 
 use std::collections::HashMap;
 
-use std::mem::{transmute, size_of, transmute_copy};
 
 #[macro_use]
 extern crate better_anymap_derive;
@@ -19,7 +18,7 @@ pub struct AnyMap{
 
 impl AnyMap {
     
-    pub fn insert<T: Id>(&mut self, item: T)
+    pub fn insert<'a, T: Id>(&'a mut self, item: T)
     {
         let v = vec![item];
         unsafe{
@@ -54,6 +53,54 @@ impl AnyMap {
             data: HashMap::new()
         }
     }
+
+}
+
+
+// Allows Vec<T> to be stored in anymap, it does however halve the possible items that can be stored. This should not be an issue for pretty much anyone though
+// It is unlikely you will have more than 2^31 unique structs you wish to store
+impl<T: Id> Id for Vec<T>{
+
+    fn get_id() -> u32 {
+        T::get_id() | 2147483648 // this number is the 32nd bit in u32 so 10000000....
+    }
+
+    fn get_instance_id(&self) -> u32 {
+        T::get_id() | 2147483648 // this number is the 32nd bit in u32 so 10000000....
+    }
+}
+
+
+// Convenience implementation for AnyMap with Vec<T> 
+pub struct AnyVecMap{
+    data: AnyMap
+}
+
+impl AnyVecMap {
+    
+    pub fn push<T: Id>(&mut self, value: T){
+        if let Some(v) = self.data.get_mut::<Vec<T>>(){
+            return v.push(value);
+        }
+        let mut v = Vec::new();
+        v.push(value);
+        self.data.insert(v);
+    }
+
+    pub fn pop<T: Id>(&mut self) -> Option<T>{
+        if let Some(v) = self.data.get_mut::<Vec<T>>(){
+            return v.pop();
+        }
+        None
+    }
+
+    pub fn new() -> Self{
+        Self{
+            data: AnyMap::new()
+        }
+    }
+
+    
 
 }
 
@@ -94,6 +141,17 @@ mod tests {
         //assert_eq!(any_map.get::<Empty>(), Some(&Empty));
         assert_eq!(any_map.get::<S1>(), Some(&S1{x:24}));
 
+    }
+
+    #[test]
+    fn anyvecmap_working(){
+        let mut any_vec_map = AnyVecMap::new();
+        any_vec_map.push(S1{x: 24});
+        any_vec_map.push(S1{x: 45});
+
+        assert_eq!(any_vec_map.pop::<S1>(), Some(S1{x: 24}));
+        assert_eq!(any_vec_map.pop::<S1>(), Some(S1{x: 45}));
+        assert_eq!(any_vec_map.pop::<S1>(), None);
     }
 
     #[test]
