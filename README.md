@@ -1,6 +1,10 @@
 # better_anymap
-An unsafe botched job that doesn't rely on types being 'static lifetime.
-Will panic if provided a 0 field struct. I will fix this when I figure out how.
+An unsafe botched job that doesn't rely on types being 'static lifetime. Don't actually use this in your project, this is WIP.
+
+Current issues
+- Zero Sized Types don't work
+- Bits are reinterpreted in a way such that pointers are dropped then referenced again (meaning you can store a struct but a Vec or struct with pointer won't work)
+
 
 
 
